@@ -40,7 +40,12 @@ export const useFormStore = create<FormStore>(set => ({
         type: 'header',
         title: 'رأس المحضـــــــــــــــر',
         formSchema: {}, // Placeholder
-        formData: { officers: [] as Officer[], centreData: '', reportData: '', officerData: '' },
+        formData: {
+          officers: [] as Officer[],
+          centre: { regionalCommand: '', company: '', centreName: '' },
+          report: { reportNumber: '', date: '' },
+          officerData: ''
+        },
         outputTemplate: '' // Placeholder
       },
       {

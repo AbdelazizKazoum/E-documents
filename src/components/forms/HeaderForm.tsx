@@ -1,79 +1,64 @@
-import React from 'react'
+// components/HeaderForm.tsx
+'use client'
+
+import React, { useState } from 'react'
+
+import { JsonForms } from '@jsonforms/react'
+
+import { materialCells } from '@jsonforms/material-renderers'
+
+import type { ValidationMode } from '@jsonforms/core'
+
+import { Button, Grid } from '@mui/material'
 
 import { useFormStore } from '@/store/formStore'
+import { schema, uischema } from '@/schemas/headerFormSchema'
+import renderers from '@/renderers/renderers'
 
 const HeaderForm = ({ handleNextStep }: { handleNextStep: (step: number) => void }) => {
+  const [validationMode, setValidationMode] = useState<ValidationMode>('ValidateAndHide')
+
   const { pvData, handleInputChange } = useFormStore()
+  const [formData, setFormData] = useState(pvData.sections.find(s => s.type === 'header')?.formData || {})
+  const [formErrors, setFormErrors] = useState([])
+
+  const handleSubmit = (e: React.FormEvent) => {
+    setValidationMode('ValidateAndShow')
+    if (formErrors.length) return
+
+    e.preventDefault()
+    console.log('Form data:', formData)
+    handleNextStep(1)
+  }
 
   return (
     <div>
-      <form
-        onSubmit={e => {
-          e.preventDefault()
-          const section = pvData.sections.find(s => s.type === 'header')
+      <Grid item xs={12} dir='rtl'>
+        <JsonForms
+          schema={schema}
+          uischema={uischema}
+          data={formData}
+          renderers={renderers}
+          cells={materialCells}
+          validationMode={validationMode}
+          onChange={({ data, errors }: any) => {
+            setFormData(data)
+            setFormErrors(errors)
 
-          console.log('Section 1 values:', section?.formData)
-          handleNextStep(1)
-        }}
-        className='space-y-4'
-      >
-        <div>
-          <label
-            htmlFor='centreData'
-            className='block text-sm font-medium mb-1.5 text-[var(--mui-palette-text-secondary)]'
-          >
-            معطيات المركز
-          </label>
-          <input
-            type='text'
-            name='centreData'
-            id='centreData'
-            value={pvData.sections.find(s => s.type === 'header')?.formData.centreData || ''}
-            onChange={e => handleInputChange('header', e.target.name, e.target.value)}
-            className='block w-full p-2.5 rounded-[var(--border-radius)] border border-[var(--border-color)] bg-[var(--mui-palette-background-paper)] text-[var(--mui-palette-text-primary)] focus:ring-1 focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] shadow-sm'
-          />
-        </div>
-        <div>
-          <label
-            htmlFor='reportData'
-            className='block text-sm font-medium mb-1.5 text-[var(--mui-palette-text-secondary)]'
-          >
-            معطيات المحضر
-          </label>
-          <input
-            type='text'
-            name='reportData'
-            id='reportData'
-            value={pvData.sections.find(s => s.type === 'header')?.formData.reportData || ''}
-            onChange={e => handleInputChange('header', e.target.name, e.target.value)}
-            className='block w-full p-2.5 rounded-[var(--border-radius)] border border-[var(--border-color)] bg-[var(--mui-palette-background-paper)] text-[var(--mui-palette-text-primary)] focus:ring-1 focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] shadow-sm'
-          />
-        </div>
-        <div>
-          <label
-            htmlFor='officerData'
-            className='block text-sm font-medium mb-1.5 text-[var(--mui-palette-text-secondary)]'
-          >
-            معطيات الضباط وأعوان الشرطة القضائية
-          </label>
-          <textarea
-            name='officerData'
-            id='officerData'
-            value={pvData.sections.find(s => s.type === 'header')?.formData.officerData || ''}
-            onChange={e => handleInputChange('header', e.target.name, e.target.value)}
-            rows={3}
-            className='block w-full p-2.5 rounded-[var(--border-radius)] border border-[var(--border-color)] bg-[var(--mui-palette-background-paper)] text-[var(--mui-palette-text-primary)] focus:ring-1 focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] shadow-sm'
-          />
-        </div>
-        <div className='flex justify-end pt-2'>
-          <button
-            type='submit'
-            className='inline-flex items-center justify-center px-5 py-2.5 border border-transparent text-sm font-medium rounded-[var(--border-radius)] shadow-sm text-white bg-[var(--primary-color)] hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--primary-color)]'
-          >
-            التالي
-          </button>
-        </div>
-      </form>
+            // Update your store
+            Object.keys(data).forEach(key => {
+              handleInputChange('header', key, data[key])
+            })
+          }}
+        />
+      </Grid>
+
+      <Grid item xs={12} className='flex justify-between'>
+        <div />
+        <Button dir='rtl' variant='contained' onClick={handleSubmit} endIcon={<i className='tabler-arrow-right' />}>
+          التالي
+        </Button>
+      </Grid>
     </div>
   )
 }
